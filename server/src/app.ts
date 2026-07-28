@@ -22,6 +22,13 @@ export function createApp() {
         if (env.corsOrigins.includes(origin) || env.corsOrigins.includes('*')) {
           return callback(null, true);
         }
+        // In development, accept any localhost port. Vite silently moves to
+        // 5174+ when 5173 is busy, and a hard-coded allowlist turns that into a
+        // confusing "login does nothing" instead of an obvious error.
+        // Production still uses the explicit allowlist only.
+        if (!isProduction && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+          return callback(null, true);
+        }
         return callback(new Error(`Origin ${origin} is not allowed by CORS`));
       },
       credentials: true,
