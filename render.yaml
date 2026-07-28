@@ -1,0 +1,24 @@
+# Render Blueprint — provisions the API service.
+# The database lives on Neon (free tier), so only the web service is declared here.
+services:
+  - type: web
+    name: erp-crm-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: server
+    buildCommand: npm install && npx prisma migrate deploy && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set these in the Render dashboard — never commit real values.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      - key: CORS_ORIGINS
+        sync: false
