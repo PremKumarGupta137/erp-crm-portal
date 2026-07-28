@@ -364,11 +364,17 @@ the previous one.
    | `NODE_ENV` | `production` |
    | `CORS_ORIGINS` | Vercel URL (add after step 3) |
 
-4. Deploy, then seed once from the Render **Shell** tab:
+4. Deploy. The build command runs `prisma migrate deploy`, so the schema is applied
+   automatically.
+
+   Demo data is seeded **once, from your machine**, against the same Neon database:
 
    ```bash
-   npm run seed
+   cd server && npm run seed
    ```
+
+   Render's free tier has no shell, and the seed is idempotent, so running it locally
+   against the shared database is both simpler and safe to repeat.
 
 `render.yaml` in the repo root declares the same setup as a Blueprint if you prefer
 one-click provisioning.
