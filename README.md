@@ -238,7 +238,7 @@ Edit `server/.env`:
 
 ```ini
 # Runtime — POOLED endpoint (host contains "-pooler" on Neon)
-DATABASE_URL="postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=15"
+DATABASE_URL="postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=15&connection_limit=15"
 # Migrations only — direct, unpooled endpoint (same host without "-pooler")
 DIRECT_URL="postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require"
 
@@ -254,6 +254,12 @@ CORS_ORIGINS="http://localhost:5173"
 > runtime traffic through Neon's PgBouncer pooler fixes it, but PgBouncer's transaction mode
 > can't run Prisma's migration DDL, so migrations use the direct endpoint via `directUrl`.
 > With a plain local Postgres, set both to the same value.
+
+> **Put the database in the same region as the API.** This was measured, not guessed. With
+> the database in `us-east-2` and the client in India, every Prisma round trip cost ~250ms
+> and the dashboard — which issues eleven queries — took **5.0s**. Moving the project to
+> `ap-southeast-1` and raising `connection_limit` so those queries actually run in parallel
+> brought the same endpoint to **0.85s**. Nothing about the code changed.
 
 Generate a secret with:
 
