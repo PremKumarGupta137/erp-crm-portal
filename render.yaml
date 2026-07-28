@@ -14,7 +14,11 @@ services:
       - key: NODE_ENV
         value: production
       # Set these in the Render dashboard — never commit real values.
+      # DATABASE_URL: Neon POOLED endpoint (host contains "-pooler").
       - key: DATABASE_URL
+        sync: false
+      # DIRECT_URL: Neon direct endpoint — the build step runs prisma migrate deploy.
+      - key: DIRECT_URL
         sync: false
       - key: JWT_SECRET
         generateValue: true

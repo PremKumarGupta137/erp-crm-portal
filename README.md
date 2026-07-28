@@ -237,13 +237,23 @@ cp .env.example .env
 Edit `server/.env`:
 
 ```ini
-DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
+# Runtime — POOLED endpoint (host contains "-pooler" on Neon)
+DATABASE_URL="postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&pgbouncer=true&connect_timeout=15"
+# Migrations only — direct, unpooled endpoint (same host without "-pooler")
+DIRECT_URL="postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require"
+
 JWT_SECRET="a-long-random-string"
 JWT_EXPIRES_IN="8h"
 PORT=4001
 NODE_ENV=development
 CORS_ORIGINS="http://localhost:5173"
 ```
+
+> **Why two URLs.** Neon's compute drops idle connections. A direct client hits that as
+> `connection forcibly closed` — a 500 on the first request after a quiet spell. Routing
+> runtime traffic through Neon's PgBouncer pooler fixes it, but PgBouncer's transaction mode
+> can't run Prisma's migration DDL, so migrations use the direct endpoint via `directUrl`.
+> With a plain local Postgres, set both to the same value.
 
 Generate a secret with:
 
@@ -295,7 +305,8 @@ half-configured rather than failing on the first request.
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `DATABASE_URL` | yes | Postgres connection string |
+| `DATABASE_URL` | yes | **Pooled** Postgres connection string, used at runtime |
+| `DIRECT_URL` | yes | **Unpooled** string, used only by `prisma migrate` |
 | `JWT_SECRET` | yes | Token signing key |
 | `JWT_EXPIRES_IN` | no (`8h`) | Token lifetime |
 | `PORT` | no (`4000`) | Listen port; Render injects this |
@@ -324,8 +335,10 @@ the previous one.
 ### 1. Database — Neon
 
 1. Create a project at [neon.com](https://neon.com).
-2. Copy the **pooled** connection string (host contains `-pooler`).
-3. Pick the region closest to your API region to keep round trips short.
+2. Copy **both** connection strings from the dashboard — the pooled one (host contains
+   `-pooler`) for `DATABASE_URL`, and the direct one for `DIRECT_URL`.
+3. Pick the region closest to your API region. Cross-region round trips are the reason
+   Prisma's default 5-second transaction budget had to be raised.
 
 ### 2. API — Render
 
@@ -339,7 +352,8 @@ the previous one.
 
    | Key | Value |
    |---|---|
-   | `DATABASE_URL` | Neon pooled string |
+   | `DATABASE_URL` | Neon **pooled** string (with `&pgbouncer=true`) |
+   | `DIRECT_URL` | Neon **direct** string — the build runs `prisma migrate deploy` |
    | `JWT_SECRET` | long random string |
    | `NODE_ENV` | `production` |
    | `CORS_ORIGINS` | Vercel URL (add after step 3) |

@@ -14,7 +14,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime traffic goes through Neon's connection pooler (PgBouncer). Neon's
+  // compute drops idle connections, and an unpooled client surfaces that as a
+  // "connection forcibly closed" 500 on the first request after a quiet spell.
+  url = env("DATABASE_URL")
+  // Migrations need a direct, unpooled session — PgBouncer cannot run DDL in
+  // the session mode Prisma Migrate expects.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
