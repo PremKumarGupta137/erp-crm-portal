@@ -8,9 +8,9 @@ Built for the Full Stack Developer case study.
 
 | | |
 |---|---|
-| **Live frontend** | _fill in after deploy_ |
-| **Live API** | _fill in after deploy_ |
-| **Repository** | _fill in_ |
+| **Live frontend** | https://erp-crm-portal-omega.vercel.app|
+| **Live API** |  https://erp-crm-portal-fh8u.onrender.com |
+| **Repository** |[ _fill in_](https://github.com/PremKumarGupta137/erp-crm-portal) |
 | **Postman collection** | [`docs/ERP-CRM.postman_collection.json`](docs/ERP-CRM.postman_collection.json) |
 
 ---
