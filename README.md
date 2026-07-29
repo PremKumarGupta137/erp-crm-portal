@@ -474,8 +474,4 @@ erp-crm-portal/
 
 ---
 
-## Screen recording
 
-A full walkthrough covering login as each role, the CRM flow, stock adjustment, challan
-creation, the oversell rejection and the resulting ledger entries is included with the
-submission.
